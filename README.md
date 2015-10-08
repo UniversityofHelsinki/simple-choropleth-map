@@ -1,6 +1,6 @@
 # Simple Choropleth Map
 
-This is a simple choropleth map made with
+A simple choropleth map with localization. Made with
 [D3.js](http://d3js.org) & 
 [Datamaps](http://datamaps.github.io/).
 
