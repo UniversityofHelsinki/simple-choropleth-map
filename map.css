@@ -1,8 +1,6 @@
 body {
-  margin: 0;
-  overflow: hidden;
+  background: #fcfcfa;
 }
-
 svg {
   font: 10px sans-serif;
 }
