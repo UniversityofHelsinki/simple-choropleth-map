@@ -4,6 +4,8 @@ This is a simple choropleth map made with
 [D3.js](http://d3js.org) & 
 [Datamaps](http://datamaps.github.io/).
 
+![The included example running in-browser](https://raw.githubusercontent.com/UniversityofHelsinki/simple-choropleth-map/master/screenshot.png)
+
 After downloading the repository, run `bower install` to install dependencies.
 *Note: (For more information on installing and using bower, see [bower.io](http://bower.io/).)*
 
