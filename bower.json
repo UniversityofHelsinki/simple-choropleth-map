@@ -1,0 +1,22 @@
+{
+  "name": "simple-choropleth-map",
+  "version": "1.0.0",
+  "homepage": "https://github.com/UniversityofHelsinki/simple-choropleth-map",
+  "authors": [
+    "Ian Tuomi <ian.tuomi@gofore.com>"
+  ],
+  "description": "Simple choropleth world map using d3 and datamaps",
+  "license": "GPL V2",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "datamaps": "~0.4.0",
+    "d3-geo-projection": "~0.2.15",
+    "normalize.css": "~3.0.3"
+  }
+}
