@@ -1,8 +1,10 @@
 // Input parameters
-var langParameter = 'FI'; // Language to display hover country names. Options 'FI', 'EN', 'SV'
-var dataPathParameter = 'data/example.csv'; // URL path to input CSV File
+var langParameter = 'EN'; // Language to display hover country names. Options 'FI', 'EN', 'SV'
+var defaultDataPath = 'data/example.csv'; // URL path to input CSV File
+var files = ['example.csv', 'example1.csv', 'example2.csv'];
 
-var app = function(dataPath, lang) {
+
+var app = function(lang) {
 
   // Parameters
   var dataColumn = 'External_organisation_count';
@@ -14,20 +16,19 @@ var app = function(dataPath, lang) {
     'EN': 'Collaborative Publications',
     'SV': 'Samverkande publikationer'
   };
+  // /Parameters
 
   // Globals
   var map;
   var dataSet = {};
   var paletteScale;
-  var country_names = {}
+  var countryNames = {};
+  var maxValue = 0;
+  // /Globals
 
-  var getMax = function(column, data) {
-    return data.reduce(function(prev, curr) {
-      return Math.max(prev, curr[column]);
-    }, 0);
-  };
+  var drawLegend = function() {
+    d3.select("svg .key").remove();
 
-  var drawLegend = function(map, maxValue, mapWidth) {
     var svg = map.svg;
     var width = Number(svg.style('width').replace("px", ""));
     var height = Number(svg.style('height').replace("px", ""));
@@ -35,7 +36,7 @@ var app = function(dataPath, lang) {
     // A position encoding for the key only.
     var x = d3.scale.linear()
       .domain([0, maxValue])
-      .range([0, width/3]);
+      .range([0, width / 3]);
 
     var tickFormat = d3.format(".2r");
 
@@ -53,7 +54,7 @@ var app = function(dataPath, lang) {
 
     var g = svg.append("g")
       .attr("class", "key")
-      .attr("transform", "translate(" + ( Math.max(0,(width/2.2) )) + "," + ((height - 25) - height/10) + ")");
+      .attr("transform", "translate(" + (Math.max(0, (width / 2.2))) + "," + ((height - 25) - height / 10) + ")");
 
     g.selectAll("rect")
       .data(paletteScale.range().map(function(color) {
@@ -81,46 +82,64 @@ var app = function(dataPath, lang) {
 
   };
 
-  dsv('languages.csv', function(error, data) {
-    if (error)
-      console.log(error);
-
-    data.map(function(d) {
-      country_names[d.ISO_3166] = d[lang];
-    });
-  });
-
-  var maxValue;
-
-  var projection = function(element) {
-        var projection = d3.geo.winkel3()
-          .translate([element.offsetWidth / 2, element.offsetHeight / 2])
-          .scale(100 * (element.offsetWidth/500))
-
-        var path = d3.geo.path()
-          .projection(projection);
-
-        return {path: path, projection: projection};
-      }
-
-  dsv(dataPath, function(error, data) {
-    if (error)
-      console.log(error);
-
-    maxValue = getMax(dataColumn, data);
+  function definePalette() {
+    var categories = [0, maxValue * .1, maxValue * .25, maxValue * .5];
 
     paletteScale = d3.scale.threshold()
-      .domain([0, maxValue * .1, maxValue * .25, maxValue * .5])
-      .range(["#ddd", "#c3d7cf", "#97b5aa", "#629894", "#357b71"]);
+      .domain(categories)
+      .range(
+        d3.range(categories.length + 1).map(
+          d3.scale.linear()
+          .domain([0, categories.length])
+          .range(["#EDF9F8", "#49a99a"])
+          .interpolate(d3.interpolateHcl)
+        )
+      );
+  }
 
-    data.map(function(d) {
-      dataSet[d.ISO_3166] = {
-        localized_country: country_names[d.ISO_3166],
-        publications: d[dataColumn],
-        fillColor: paletteScale(d[dataColumn])
-      };
-    });
+  var populateCountryNames = function(d) {
+    countryNames[d.ISO_3166] = d[lang];
+  };
 
+  var populateDataSet = function(d) {
+    dataSet[d.ISO_3166] = {
+      localized_country: countryNames[d.ISO_3166],
+      publications: d[dataColumn]
+    };
+    maxValue = Math.max(maxValue, d[dataColumn]);
+  };
+
+  var projection = function(element) {
+    var projection = d3.geo.winkel3()
+      .translate([element.offsetWidth / 2, element.offsetHeight / 2])
+      .scale(100 * (element.offsetWidth / 500));
+
+    var path = d3.geo.path()
+      .projection(projection);
+
+    return {
+      path: path,
+      projection: projection
+    };
+  }
+
+  var getMax = function(column, data) {
+    return data.reduce(function(prev, curr) {
+      return Math.max(prev, curr[column]);
+    }, 0);
+  };
+
+
+  function addPalette() {
+    for (var index in dataSet) {
+      dataSet[index]['fillColor'] = paletteScale(dataSet[index]['publications']);
+      // It is necessary to also update color because of a bug in DataMaps
+      dataSet[index]['color'] = dataSet[index]['fillColor'];
+    }
+  }
+
+
+  function drawMap() {
     map = new Datamap({
       scope: 'world',
       element: document.getElementById(outerDiv),
@@ -131,11 +150,11 @@ var app = function(dataPath, lang) {
       geographyConfig: {
         popupTemplate: function(geography, data) {
           return '<div class="hoverinfo">' +
-            (geography.id in country_names ? country_names[geography.id] : geography.properties.name) + ': ' +
+            (geography.id in countryNames ? countryNames[geography.id] : geography.properties.name) + ': ' +
             (data ? data.publications : '0') +
             '</div>';
         },
-        highlightFillColor: '#222',
+        highlightFillColor: '#9A9A9A', //'#222',
         highlightFillOpacity: 0.8,
         highlightBorderWidth: 0,
         highlightBorderColor: '#FFFFFF'
@@ -144,16 +163,62 @@ var app = function(dataPath, lang) {
       responsive: true
     });
 
-    drawLegend(map, maxValue)
-  });
+  }
 
 
-  d3.select(window).on('resize', function() {
-    d3.select("svg .key").remove();
-    map.projection(projection);
-    map.resize();
-    drawLegend(map, maxValue);
-  });
+  var ready = function() {
+    definePalette();
+    addPalette();
+
+    if (map !== undefined) {
+      map.updateChoropleth(dataSet);
+      drawLegend();
+    } else {
+      drawMap();
+      drawLegend();
+    }
+  };
+
+
+  var run = function(path) {
+    maxValue = 0;
+
+    queue()
+      .defer(dsv, path, populateDataSet)
+      .defer(dsv, 'languages.csv', populateCountryNames)
+      .await(ready);
+
+    d3.select(window).on('resize', function() {
+      map.projection(projection);
+      map.resize();
+      drawLegend();
+    });
+  };
+
+  run(defaultDataPath);
+
+
+  function change() {
+    var selectedIndex = select.property('selectedIndex');
+    var selectedItem = options[0][selectedIndex].__data__;
+    run('data/' + selectedItem);
+  }
+
+
+  var select = d3.select("#simple-choropleth-map")
+    .append("div")
+    .append("select")
+    .on("change", change);
+
+  var options = select
+    .selectAll("option")
+    .data(files)
+    .enter()
+    .append("option")
+    .text(function(d) {
+      return d;
+    });
+
 };
 
-app(dataPathParameter, langParameter);
+app(langParameter);
