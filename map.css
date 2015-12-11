@@ -1,7 +1,7 @@
 body {
 }
 svg {
-  font: 10px sans-serif;
+  font: 10px 'Open Sans';
 }
 
 .caption {
@@ -16,3 +16,61 @@ svg {
   stroke: #000;
   shape-rendering: crispEdges;
 }
+
+.simple-choropleth-map-dropdown-select{
+    font-size: inherit; /* inherit size from .custom-dropdown */
+    padding: .5em; /* add some space*/
+    margin: 0; /* remove default margins */
+}
+
+@supports (pointer-events: none) and
+      ((-webkit-appearance: none) or
+      (-moz-appearance: none) or
+      (appearance: none)) {
+
+    .simple-choropleth-map-dropdown-outer {
+      position:relative;
+      width: 200px;
+      margin: 0 auto 10px auto;
+    }
+
+    .simple-choropleth-map-dropdown-select {
+        background-color: #ffffff;
+        width:100%;
+        border: 2px solid #ebebeb;
+        border-radius: 0px;
+        padding: 0.5em 2.5em 0.5em 0.5em ;
+        font-family: 'Open Sans';
+        font-size: 14px;
+        font-weight: bold;
+        line-height: 1.7em;
+        color: #49A99A;
+
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+    }
+
+    .simple-choropleth-map-dropdown::before,
+    .simple-choropleth-map-dropdown::after {
+        content: "";
+        position: absolute;
+        pointer-events: none;
+    }
+
+    .simple-choropleth-map-dropdown::after { /*  Custom dropdown arrow */
+        content: "\25BC";
+        color: #49A99A;
+        right: 1.2em;
+        height: 1em;
+        font-size: .625em;
+        line-height: 1;
+        top: 50%; margin-top: -.5em;
+    }
+
+    .simple-choropleth-map-dropdown::before { /*  Custom dropdown arrow cover */
+        width: 2em;
+        right: 0; top: 0; bottom: 0;
+        border-radius: 0 3px 3px 0;
+    }
+  }

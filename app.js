@@ -5,7 +5,6 @@ var files = ['example.csv', 'example1.csv', 'example2.csv'];
 
 
 var app = function(lang) {
-
   // Parameters
   var dataColumn = 'External_organisation_count';
   var dsv = d3.dsv(";", "text/plain");
@@ -16,7 +15,6 @@ var app = function(lang) {
     'EN': 'Collaborative Publications',
     'SV': 'Samverkande publikationer'
   };
-  // /Parameters
 
   // Globals
   var map;
@@ -24,7 +22,7 @@ var app = function(lang) {
   var paletteScale;
   var countryNames = {};
   var maxValue = 0;
-  // /Globals
+
 
   var drawLegend = function() {
     d3.select("svg .key").remove();
@@ -79,8 +77,8 @@ var app = function(lang) {
       .attr("class", "caption")
       .attr("y", -6)
       .text(legendTitle[lang]);
-
   };
+
 
   function definePalette() {
     var categories = [0, maxValue * .1, maxValue * .25, maxValue * .5];
@@ -101,6 +99,7 @@ var app = function(lang) {
     countryNames[d.ISO_3166] = d[lang];
   };
 
+
   var populateDataSet = function(d) {
     dataSet[d.ISO_3166] = {
       localized_country: countryNames[d.ISO_3166],
@@ -108,6 +107,7 @@ var app = function(lang) {
     };
     maxValue = Math.max(maxValue, d[dataColumn]);
   };
+
 
   var projection = function(element) {
     var projection = d3.geo.winkel3()
@@ -123,6 +123,7 @@ var app = function(lang) {
     };
   }
 
+
   var getMax = function(column, data) {
     return data.reduce(function(prev, curr) {
       return Math.max(prev, curr[column]);
@@ -133,16 +134,21 @@ var app = function(lang) {
   function addPalette() {
     for (var index in dataSet) {
       dataSet[index]['fillColor'] = paletteScale(dataSet[index]['publications']);
-      // It is necessary to also update color because of a bug in DataMaps
+      // It is necessary to also update 'color' because of a bug in DataMaps
       dataSet[index]['color'] = dataSet[index]['fillColor'];
     }
   }
 
 
   function drawMap() {
+    innerDiv = 'simple-choropleth-map-innerDiv';
+    mapElem = d3.select('#' + outerDiv)
+      .append('div')
+      .attr('id', 'simple-choropleth-map-innerDiv')
+
     map = new Datamap({
       scope: 'world',
-      element: document.getElementById(outerDiv),
+      element: document.getElementById(innerDiv),
       setProjection: projection,
       fills: {
         defaultFill: '#ddd'
@@ -180,6 +186,27 @@ var app = function(lang) {
   };
 
 
+  var select = d3.select("#simple-choropleth-map")
+    .append("div")
+      .style("width", +'px')
+      .attr('class', 'simple-choropleth-map-dropdown-outer')
+    .append("div")
+      .attr('class','simple-choropleth-map-dropdown')
+    .append("select")
+      .attr('class','simple-choropleth-map-dropdown-select')
+    .on("change", change)
+
+
+  var options = select
+    .selectAll("option")
+    .data(files)
+    .enter()
+    .append("option")
+    .text(function(d) {
+      return d;
+    });
+
+
   var run = function(path) {
     maxValue = 0;
 
@@ -193,31 +220,19 @@ var app = function(lang) {
       map.resize();
       drawLegend();
     });
+    console.log(map)
+
+    d3.select("#simple-choropleth-map-dropdown-outer")
+      .style("width", map.width)
   };
 
   run(defaultDataPath);
-
 
   function change() {
     var selectedIndex = select.property('selectedIndex');
     var selectedItem = options[0][selectedIndex].__data__;
     run('data/' + selectedItem);
   }
-
-
-  var select = d3.select("#simple-choropleth-map")
-    .append("div")
-    .append("select")
-    .on("change", change);
-
-  var options = select
-    .selectAll("option")
-    .data(files)
-    .enter()
-    .append("option")
-    .text(function(d) {
-      return d;
-    });
 
 };
 
