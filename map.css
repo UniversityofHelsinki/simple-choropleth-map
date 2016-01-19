@@ -24,8 +24,10 @@ svg {
 }
 
 .dropdown-container {
-  margin: 0 auto 10px auto;
-  display: inline-block;
+  width: 80%;
+  height: 50px;
+  margin: auto;
+  padding: 10px;
 }
 
 @supports (pointer-events: none) and
@@ -36,8 +38,16 @@ svg {
     .simple-choropleth-map-dropdown-outer {
       display: inline-block;
       position: relative;
-      width: 200px;
-      margin: 0 50px 10px 50px;
+      width: 46%;
+    }
+
+    .simple-choropleth-map-dropdown-outer:first-child {
+      margin-left: 5px;
+      float:left;
+    }
+    .simple-choropleth-map-dropdown-outer:last-child {
+      margin-right: 5px;
+      float:right;
     }
 
     .simple-choropleth-map-dropdown-select {
