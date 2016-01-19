@@ -80,7 +80,7 @@ var app = function(lang) {
   };
 
 
-  function definePalette() {
+  function definePalette(light, dark) {
     var categories = [0, maxValue * .1, maxValue * .25, maxValue * .5];
 
     paletteScale = d3.scale.threshold()
@@ -89,7 +89,7 @@ var app = function(lang) {
         d3.range(categories.length + 1).map(
           d3.scale.linear()
           .domain([0, categories.length])
-          .range(["#EDF9F8", "#49a99a"])
+          .range([light, dark])
           .interpolate(d3.interpolateHcl)
         )
       );
@@ -173,7 +173,8 @@ var app = function(lang) {
 
 
   var ready = function() {
-    definePalette();
+    definePalette("#EDF2FA", "#769bd2");
+    definePalette("#EDF9F8", "#49a99a");
     addPalette();
 
     if (map !== undefined) {
@@ -185,27 +186,38 @@ var app = function(lang) {
     }
   };
 
-
-  var select = d3.select("#simple-choropleth-map")
+  var dropdown_container = d3.select("#simple-choropleth-map")
     .append("div")
-      .style("width", +'px')
-      .attr('class', 'simple-choropleth-map-dropdown-outer')
-    .append("div")
-      .attr('class','simple-choropleth-map-dropdown')
-    .append("select")
-      .attr('class','simple-choropleth-map-dropdown-select')
-    .on("change", change)
+      .attr('class', 'dropdown-container');
 
+  function createDropdown() {
 
-  var options = select
-    .selectAll("option")
-    .data(files)
-    .enter()
-    .append("option")
-    .text(function(d) {
-      return d;
+    var select = dropdown_container
+      .append("div")
+        .attr('class', 'simple-choropleth-map-dropdown-outer')
+      .append("div")
+        .attr('class','simple-choropleth-map-dropdown')
+      .append("select")
+        .attr('class','simple-choropleth-map-dropdown-select');
+
+    var options = select
+      .selectAll("option")
+      .data(files)
+      .enter()
+      .append("option")
+      .text(function(d) {
+        return d;
+      });
+
+    select.on("change", function() {
+      var selectedIndex = select.property('selectedIndex');
+      var selectedItem = options[0][selectedIndex].__data__;
+      run('data/' + selectedItem);
     });
+  }
 
+  createDropdown ();
+  createDropdown ();
 
   var run = function(path) {
     maxValue = 0;
@@ -220,19 +232,11 @@ var app = function(lang) {
       map.resize();
       drawLegend();
     });
-    console.log(map)
 
-    d3.select("#simple-choropleth-map-dropdown-outer")
-      .style("width", map.width)
   };
 
   run(defaultDataPath);
 
-  function change() {
-    var selectedIndex = select.property('selectedIndex');
-    var selectedItem = options[0][selectedIndex].__data__;
-    run('data/' + selectedItem);
-  }
 
 };
 

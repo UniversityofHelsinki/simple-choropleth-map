@@ -23,15 +23,21 @@ svg {
     margin: 0; /* remove default margins */
 }
 
+.dropdown-container {
+  margin: 0 auto 10px auto;
+  display: inline-block;
+}
+
 @supports (pointer-events: none) and
       ((-webkit-appearance: none) or
       (-moz-appearance: none) or
       (appearance: none)) {
 
     .simple-choropleth-map-dropdown-outer {
-      position:relative;
+      display: inline-block;
+      position: relative;
       width: 200px;
-      margin: 0 auto 10px auto;
+      margin: 0 50px 10px 50px;
     }
 
     .simple-choropleth-map-dropdown-select {
