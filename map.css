@@ -30,6 +30,10 @@ svg {
   padding: 10px;
 }
 
+select.selected {
+  border-color: #777;
+}
+
 @supports (pointer-events: none) and
       ((-webkit-appearance: none) or
       (-moz-appearance: none) or

@@ -9,6 +9,8 @@ var app = function(lang) {
   var dataColumn = 'External_organisation_count';
   var dsv = d3.dsv(";", "text/plain");
   var outerDiv = 'simple-choropleth-map';
+  var defaultPalette = ["#EDF2FA", "#769bd2"];
+  var palette = defaultPalette;
 
   var legendTitle = {
     'FI': 'Yhteistyössä tehdyt julkaisut',
@@ -22,7 +24,6 @@ var app = function(lang) {
   var paletteScale;
   var countryNames = {};
   var maxValue = 0;
-
 
   var drawLegend = function() {
     d3.select("svg .key").remove();
@@ -80,7 +81,7 @@ var app = function(lang) {
   };
 
 
-  function definePalette(light, dark) {
+  function definePalette() {
     var categories = [0, maxValue * .1, maxValue * .25, maxValue * .5];
 
     paletteScale = d3.scale.threshold()
@@ -89,7 +90,7 @@ var app = function(lang) {
         d3.range(categories.length + 1).map(
           d3.scale.linear()
           .domain([0, categories.length])
-          .range([light, dark])
+          .range(palette)
           .interpolate(d3.interpolateHcl)
         )
       );
@@ -173,24 +174,28 @@ var app = function(lang) {
 
 
   var ready = function() {
-    definePalette("#EDF2FA", "#769bd2");
-    definePalette("#EDF9F8", "#49a99a");
-    addPalette();
-
-    if (map !== undefined) {
-      map.updateChoropleth(dataSet);
-      drawLegend();
-    } else {
+    if (map === undefined) {
+      definePalette();
+      addPalette();
       drawMap();
       drawLegend();
-    }
+
+      d3.select(window).on('resize', function() {
+        map.projection(projection);
+        map.resize();
+        drawLegend();
+      });
+
+    } else {
+      definePalette();
+      addPalette();
+      map.updateChoropleth(dataSet);
+      drawLegend();
+    };
   };
 
-  var dropdown_container = d3.select("#simple-choropleth-map")
-    .append("div")
-      .attr('class', 'dropdown-container');
 
-  function createDropdown() {
+  function createDropdown(files, dropdownPalette) {
 
     var select = dropdown_container
       .append("div")
@@ -209,34 +214,40 @@ var app = function(lang) {
         return d;
       });
 
+    select.style("color", dropdownPalette[1]);
+
     select.on("change", function() {
+      palette = dropdownPalette;
+
+      d3.selectAll("select")
+        .classed("selected", false);
+
+      select.classed("selected", true);
+
       var selectedIndex = select.property('selectedIndex');
       var selectedItem = options[0][selectedIndex].__data__;
       run('data/' + selectedItem);
     });
   }
 
-  createDropdown ();
-  createDropdown ();
-
-  var run = function(path) {
+  function run(path) {
     maxValue = 0;
 
     queue()
       .defer(dsv, path, populateDataSet)
       .defer(dsv, 'languages.csv', populateCountryNames)
       .await(ready);
-
-    d3.select(window).on('resize', function() {
-      map.projection(projection);
-      map.resize();
-      drawLegend();
-    });
-
   };
 
-  run(defaultDataPath);
+  // RUN
+  var dropdown_container = d3.select("#simple-choropleth-map")
+    .append("div")
+      .attr('class', 'dropdown-container');
 
+  createDropdown(files, defaultPalette);
+  createDropdown(files, ["#EDF9F8", "#49a99a"]);
+
+  run(defaultDataPath);
 
 };
 
