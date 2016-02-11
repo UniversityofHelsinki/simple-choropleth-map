@@ -1,8 +1,18 @@
 // Input parameters
-var langParameter = 'EN'; // Language to display hover country names. Options 'FI', 'EN', 'SV'
+var langParameter = 'FI'; // Language to display hover country names. Options 'FI', 'EN', 'SV'
 var defaultDataPath = 'data/example.csv'; // URL path to input CSV File
 var files = ['example.csv', 'example1.csv', 'example2.csv'];
 
+var category1 = {
+  'EN' : 'Category 1',
+  'FI' : 'Kategoria 1',
+  'SV' : 'Kategori 1'
+}
+var category2 = {
+  'EN' : 'Category 2',
+  'FI' : 'Kategoria 2',
+  'SV' : 'Kategori 2'
+}
 
 var app = function(lang) {
   // Parameters
@@ -243,12 +253,12 @@ var app = function(lang) {
   title.append("div")
       .attr('class', 'simple-choropleth-map-dropdown-outer')
     .append("h2")
-    .text("Kategoria 1");
+    .text(category1[langParameter]);
 
   title.append("div")
       .attr('class', 'simple-choropleth-map-dropdown-outer')
     .append("h2")
-    .text("Kategoria 2");
+    .text(category2[langParameter]);
 
 
   var dropdown_container = d3.select("#simple-choropleth-map")
