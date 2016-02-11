@@ -235,6 +235,8 @@ var app = function(lang) {
       var selectedItem = options[0][selectedIndex].__data__;
       run('data/' + selectedItem);
     });
+
+    return select;
   }
 
   function run(path) {
@@ -265,7 +267,9 @@ var app = function(lang) {
     .append("div")
     .attr('class', 'dropdown-container');
 
-  createDropdown(files, defaultPalette);
+  createDropdown(files, defaultPalette)
+    .classed("selected", true);
+
   createDropdown(files, ["#EDF9F8", "#49a99a"]);
 
   run(defaultDataPath);
