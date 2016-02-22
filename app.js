@@ -1,4 +1,5 @@
-// Input parameters
+/* Parameters */
+
 var langParameter = 'FI'; // Language to display hover country names. Options 'FI', 'EN', 'SV'
 var defaultDataPath = 'data/example.csv'; // URL path to input CSV File
 var files = ['example.csv', 'example1.csv', 'example2.csv'];
@@ -14,6 +15,13 @@ var category2 = {
   'SV' : 'Kategori 2'
 }
 
+var legendTitle = {
+  'FI': 'Yhteistyössä tehdyt julkaisut',
+  'EN': 'Collaborative Publications',
+  'SV': 'Samverkande publikationer'
+};
+
+/* * */
 var app = function(lang) {
   // Parameters
   var dataColumn = 'External_organisation_count';
@@ -21,12 +29,6 @@ var app = function(lang) {
   var outerDiv = 'simple-choropleth-map';
   var defaultPalette = ["#EDF2FA", "#769bd2"];
   var palette = defaultPalette;
-
-  var legendTitle = {
-    'FI': 'Yhteistyössä tehdyt julkaisut',
-    'EN': 'Collaborative Publications',
-    'SV': 'Samverkande publikationer'
-  };
 
   // Globals
   var map;
